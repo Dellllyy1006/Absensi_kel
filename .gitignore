@@ -1,0 +1,11 @@
+/vendor/
+/node_modules/
+.env
+.DS_Store
+Thumbs.db
+/public/uploads/photos/*
+!/public/uploads/photos/.gitkeep
+/public/uploads/qrcodes/*
+!/public/uploads/qrcodes/.gitkeep
+*.log
+/tmp/
