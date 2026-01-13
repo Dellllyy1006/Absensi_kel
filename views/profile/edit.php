@@ -60,6 +60,24 @@
                     </div>
 
                     <div class="form-section">
+                        <h3><i class="fas fa-lock"></i> Pengaturan Akun</h3>
+                        
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" 
+                                   class="form-control" value="<?= e($user['username']) ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password Baru</label>
+                            <input type="password" id="password" name="password" 
+                                   class="form-control" minlength="6"
+                                   placeholder="Kosongkan jika tidak ingin mengubah">
+                            <small>Minimal 6 karakter</small>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
                         <h3><i class="fas fa-address-card"></i> Kontak</h3>
                         
                         <div class="form-group">

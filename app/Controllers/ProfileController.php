@@ -127,19 +127,51 @@ class ProfileController extends Controller
 
         $success = $this->siswaRepository->update($profile['id'], $profileData);
 
-        // Update email if changed
+        // Update user account data (email, username, password)
+        $userData = [];
+        
+        // Email update
         $newEmail = trim($this->getPost('email'));
         if ($newEmail !== $user['email']) {
             if (!$this->userRepository->emailExists($newEmail)) {
-                $this->userRepository->update($user['id'], ['email' => $newEmail]);
+                $userData['email'] = $newEmail;
+            } else {
+                $this->setFlash('error', 'Email sudah digunakan');
+                $this->redirect('/profile/edit');
             }
         }
 
-        if ($success) {
+        // Username update
+        $newUsername = trim($this->getPost('username'));
+        if (!empty($newUsername) && $newUsername !== $user['username']) {
+            if (!$this->userRepository->usernameExists($newUsername)) {
+                $userData['username'] = $newUsername;
+            } else {
+                $this->setFlash('error', 'Username sudah digunakan');
+                $this->redirect('/profile/edit');
+            }
+        }
+
+        // Password update
+        $newPassword = $this->getPost('password');
+        if (!empty($newPassword)) {
+            if (strlen($newPassword) >= 6) {
+                $userData['password'] = $newPassword;
+            } else {
+                $this->setFlash('error', 'Password minimal 6 karakter');
+                $this->redirect('/profile/edit');
+            }
+        }
+
+        if (!empty($userData)) {
+            $this->userRepository->update($user['id'], $userData);
+        }
+
+        if ($success || !empty($userData)) {
             $this->authService->refreshSession();
             $this->setFlash('success', 'Profil berhasil diperbarui');
         } else {
-            $this->setFlash('error', 'Gagal memperbarui profil');
+            $this->setFlash('error', 'Tidak ada perubahan yang disimpan');
         }
 
         $this->redirect('/profile');
@@ -225,10 +257,18 @@ class ProfileController extends Controller
             $this->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $profile = $user['profile'];
+        $profile = $user['profile'] ?? $this->siswaRepository->findByUserId($user['id']);
+        
+        if (!$profile) {
+             $this->json(['success' => false, 'message' => 'Profil siswa tidak ditemukan'], 404);
+        }
+
         $qrPath = $this->qrService->generateSiswaQR($profile['id'], $profile['nis']);
 
         if ($qrPath) {
+            // Save to database
+            $this->siswaRepository->update($profile['id'], ['qr_code' => $qrPath]);
+            
             $this->authService->refreshSession();
             $this->json([
                 'success' => true,
