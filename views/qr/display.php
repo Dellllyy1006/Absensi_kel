@@ -120,7 +120,16 @@
         <div id="currentTime" class="time-display"><?= date('H:i:s') ?></div>
         
         <div class="qr-container">
-            <img src="<?= asset('uploads/qrcodes/' . $qrPath) ?>" alt="QR Code Absensi">
+            <?php 
+            $realQrPath = QRCODE_PATH . $qrPath;
+            $qrSrc = asset('uploads/qrcodes/' . $qrPath);
+            
+            if (file_exists($realQrPath)) {
+                $qrData = base64_encode(file_get_contents($realQrPath));
+                $qrSrc = 'data:image/png;base64,' . $qrData;
+            }
+            ?>
+            <img src="<?= $qrSrc ?>" alt="QR Code Absensi">
         </div>
         
         <div class="info">

@@ -42,30 +42,28 @@ class QRCodeService implements QRServiceInterface
     {
         $filepath = $this->qrCodePath . $filename;
         
-        // Try using GD library first
+        // Note: Local phpqrcode library is now installed manually (full merged version).
+        
+        // Method 1: Local GD Generation (Primary)
         if (function_exists('imagecreatetruecolor')) {
             try {
-                require_once __DIR__ . '/../../vendor/phpqrcode/qrlib.php';
+                // Ensure the library is loaded
+                if (!class_exists('QRcode')) {
+                    require_once __DIR__ . '/../../vendor/phpqrcode/qrlib.php';
+                }
+                
                 \QRcode::png($data, $filepath, QR_ECLEVEL_M, 10, 2);
                 return file_exists($filepath);
             } catch (\Exception $e) {
-                // Fall through to API method
+                // Log error if needed: error_log($e->getMessage());
             }
         }
         
-        // Fallback: Use Google Charts API
+        // Fallback: Google Charts API (only if local fails)
         $size = '300x300';
         $url = 'https://chart.googleapis.com/chart?cht=qr&chs=' . $size . '&chl=' . urlencode($data) . '&choe=UTF-8';
         
         $imageData = @file_get_contents($url);
-        if ($imageData !== false) {
-            file_put_contents($filepath, $imageData);
-            return file_exists($filepath);
-        }
-        
-        // Final fallback: Use goqr.me API
-        $url2 = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($data);
-        $imageData = @file_get_contents($url2);
         if ($imageData !== false) {
             file_put_contents($filepath, $imageData);
             return file_exists($filepath);

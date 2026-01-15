@@ -42,8 +42,16 @@
         <div class="card-body">
             <div class="active-session">
                 <div class="qr-preview">
-                    <img src="<?= asset('uploads/qrcodes/session_' . $activeSession['session_code'] . '.png') ?>" 
-                         alt="QR Code">
+                    <?php 
+                    $qrPath = QRCODE_PATH . 'session_' . $activeSession['session_code'] . '.png';
+                    $qrSrc = asset('uploads/qrcodes/session_' . $activeSession['session_code'] . '.png');
+                    
+                    if (file_exists($qrPath)) {
+                        $qrData = base64_encode(file_get_contents($qrPath));
+                        $qrSrc = 'data:image/png;base64,' . $qrData;
+                    }
+                    ?>
+                    <img src="<?= $qrSrc ?>" alt="QR Code">
                 </div>
                 <div class="session-info">
                     <p><strong>Kode Sesi:</strong> <?= e($activeSession['session_code']) ?></p>
